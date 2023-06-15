@@ -227,153 +227,70 @@ def nntc_docker(latest_tpu_perf_whl, commit_id, case_list, model_zoo_dir, nntc_d
     image = 'sophgo/tpuc_dev:v2.1'
     client.images.pull(image)
 
-    # # Glob kernel module
-    # import glob
-    # kernel_module = glob.glob(os.path.join(nntc_dir, 'lib/*kernel_module*'))
-    # assert kernel_module
-    # kernel_module = kernel_module[0]
-
     # NNTC container
-    # nntc_container = client.containers.run(
-    #     image, 'bash',
-    #     volumes=[f'{root}:/workspace'],
-    #     restart_policy={'Name': 'always'},
-    #     environment=[
-    #         f'NETCOMPILER_TOP=/workspace/nntoolchain/net_compiler',
-    #         f'BM1682_PATH=$NETCOMPILER_TOP/../aicplatform/bm1682',
-    #         f'BMCOMPILER_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmcompiler',
-    #         f'BMRUNTIME_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmruntime',
-    #         f'BM_INSTALL_PATH=$NETCOMPILER_TOP/out/install',
-    #         f'BMLANG_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmlang',
-    #         f'IMPBMNETC_INSTALL_PATH=$NETCOMPILER_TOP/out/install_impbmnetc',
-    #         f'IMPBMNETCRT_INSTALL_PATH=$NETCOMPILER_TOP/out/install_impbmnetcrt',
-    #         f'BMCPU_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmcpu',
-    #         f'BMNETC_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmnetc',
-    #         f'BMNETU_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmnetu',
-    #         f'BMUFW_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmufw',
-    #         f'BMTPU_BACKEND_PATH=$NETCOMPILER_TOP/bmcompiler/libbackend',
-    #         f'USERCPU_INSTALL_PATH=$NETCOMPILER_TOP/out/install_usercpu',
-    #         f'BMODEL_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmodel',
-    #         f'BMCOMPILER_KERNEL_MODULE_PATH=$NETCOMPILER_TOP/../tpu-runtime/lib/libbm1684x_kernel_module.so',
-    #         f'LD_LIBRARY_PATH=/usr/local/cuda-7.5/lib64:' \
-    #         f'/opt/OpenBLAS/lib/:' \
-    #         f'$BM_INSTALL_PATH/lib:' \
-    #         f'$BMCOMPILER_INSTALL_PATH/lib:' \
-    #         f'$BMLANG_INSTALL_PATH/lib:' \
-    #         f'$IMPBMNETC_INSTALL_PATH/lib:' \
-    #         f'$IMPBMNETCRT_INSTALL_PATH/lib' \
-    #         f'$BMCPU_INSTALL_PATH/lib:' \
-    #         f'$BMNETC_INSTALL_PATH/lib:' \
-    #         f'$BMNETU_INSTALL_PATH/lib:' \
-    #         f'$BMUFW_INSTALL_PATH/lib:' \
-    #         f'$BMRUNTIME_INSTALL_PATH/lib:' \
-    #         f'$BMTPU_BACKEND_PATH:' \
-    #         f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/protobuf_x86_64/lib:' \
-    #         f'$USERCPU_INSTALL_PATH/lib:' \
-    #         f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/lmdb/lib:' \
-    #         f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/openblas/lib:' \
-    #         f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/tflite/2.8.0/lib/release:' \
-    #         f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/hdf5-1.8.16_x86_64/lib:' \
-    #         f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/pytorch/openmpi/lib:' \
-    #         f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/pytorch/ibverbs:' \
-    #         f'NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/pytorch/hwloc:' \
-    #         f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/openblas/lib:',
-    #         f'PATH=$BMRUNTIME_INSTALL_PATH/app:$BMODEL_INSTALL_PATH/tools:$BMLANG_INSTALL_PATH/test:' \
-    #         f'/usr/local/bin:/usr/bin:/bin'
-    #     ],
-    #     tty=True, detach=True)
-    # logging.info(f'NNTC container {nntc_container.name}')
-
-    # Glob kernel module
-    # import glob
-    # kernel_module = glob.glob(os.path.join(nntc_dir, 'lib/*kernel_module*'))
-    # assert kernel_module
-    # kernel_module = kernel_module[0]
-
-    # # NNTC container
-    # nntc_container = client.containers.run(
-    #     image, 'bash',
-    #     volumes=[f'{root}:/workspace'],
-    #     restart_policy={'Name': 'always'},
-    #     environment=[
-    #         f'PATH=/workspace/{nntc_dir}/bin:/usr/local/bin:/usr/bin:/bin',
-    #         f'BMCOMPILER_KERNEL_MODULE_PATH=/workspace/{kernel_module}',
-    #         f'NNTC_TOP=/workspace/{nntc_dir}'],
-    #     tty=True, detach=True)
-
-    # Enter model-zoo and remove old outputs
-
     nntc_container = client.containers.run(
         image, 'bash',
         volumes=[f'{root}:/workspace'],
         restart_policy={'Name': 'always'},
         environment=[
             f'NETCOMPILER_TOP=/workspace/nntoolchain/net_compiler',
-            f'BM1682_PATH=/workspace/nntoolchain/net_compiler/../aicplatform/bm1682',
-            f'BMCOMPILER_INSTALL_PATH=/workspace/nntoolchain/net_compiler/out/install_bmcompiler',
-            f'BMRUNTIME_INSTALL_PATH=/workspace/nntoolchain/net_compiler/out/install_bmruntime',
-            f'BM_INSTALL_PATH=/workspace/nntoolchain/net_compiler/out/install',
-            f'BMLANG_INSTALL_PATH=/workspace/nntoolchain/net_compiler/out/install_bmlang',
-            f'IMPBMNETC_INSTALL_PATH=/workspace/nntoolchain/net_compiler/out/install_impbmnetc',
-            f'IMPBMNETCRT_INSTALL_PATH=/workspace/nntoolchain/net_compiler/out/install_impbmnetcrt',
-            f'BMCPU_INSTALL_PATH=/workspace/nntoolchain/net_compiler/out/install_bmcpu',
-            f'BMNETC_INSTALL_PATH=/workspace/nntoolchain/net_compiler/out/install_bmnetc',
-            f'BMNETU_INSTALL_PATH=/workspace/nntoolchain/net_compiler/out/install_bmnetu',
-            f'BMUFW_INSTALL_PATH=/workspace/nntoolchain/net_compiler/out/install_bmufw',
-            f'BMTPU_BACKEND_PATH=/workspace/nntoolchain/net_compiler/bmcompiler/libbackend',
-            f'USERCPU_INSTALL_PATH=/workspace/nntoolchain/net_compiler/out/install_usercpu',
-            f'BMODEL_INSTALL_PATH=/workspace/nntoolchain/net_compiler/out/install_bmodel',
-            f'BMCOMPILER_KERNEL_MODULE_PATH=/workspace/nntoolchain/net_compiler/../tpu-runtime/lib/libbm1684x_kernel_module.so',
+            f'BM1682_PATH=$NETCOMPILER_TOP/../aicplatform/bm1682',
+            f'BMCOMPILER_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmcompiler',
+            f'BMRUNTIME_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmruntime',
+            f'BM_INSTALL_PATH=$NETCOMPILER_TOP/out/install',
+            f'BMLANG_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmlang',
+            f'IMPBMNETC_INSTALL_PATH=$NETCOMPILER_TOP/out/install_impbmnetc',
+            f'IMPBMNETCRT_INSTALL_PATH=$NETCOMPILER_TOP/out/install_impbmnetcrt',
+            f'BMCPU_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmcpu',
+            f'BMNETC_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmnetc',
+            f'BMNETU_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmnetu',
+            f'BMUFW_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmufw',
+            f'BMTPU_BACKEND_PATH=$NETCOMPILER_TOP/bmcompiler/libbackend',
+            f'USERCPU_INSTALL_PATH=$NETCOMPILER_TOP/out/install_usercpu',
+            f'BMODEL_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmodel',
+            f'BMCOMPILER_KERNEL_MODULE_PATH=$NETCOMPILER_TOP/../tpu-runtime/lib/libbm1684x_kernel_module.so',
             f'LD_LIBRARY_PATH=/usr/local/cuda-7.5/lib64:' \
             f'/opt/OpenBLAS/lib/:' \
-            f'/workspace/nntoolchain/net_compiler/out/install/lib:' \
-            f'/workspace/nntoolchain/net_compiler/out/install_bmcompiler/lib:' \
-            f'/workspace/nntoolchain/net_compiler/out/install_bmlang/lib:' \
-            f'/workspace/nntoolchain/net_compiler/out/install_impbmnetc/lib:' \
-            f'/workspace/nntoolchain/net_compiler/out/install_impbmnetcrt/lib' \
-            f'/workspace/nntoolchain/net_compiler/out/install_bmcpu/lib:' \
-            f'/workspace/nntoolchain/net_compiler/out/install_bmnetc/lib:' \
-            f'/workspace/nntoolchain/net_compiler/out/install_bmnetu/lib:' \
-            f'/workspace/nntoolchain/net_compiler/out/install_bmufw/lib:' \
-            f'/workspace/nntoolchain/net_compiler/out/install_bmruntime/lib:' \
-            f'/workspace/nntoolchain/net_compiler/bmcompiler/libbackend:' \
-            f'/workspace/nntoolchain/net_compiler/../bm_prebuilt_toolchains/protobuf_x86_64/lib:' \
-            f'/workspace/nntoolchain/net_compiler/out/install_usercpu/lib:' \
-            f'/workspace/nntoolchain/net_compiler/../bm_prebuilt_toolchains/x86/lmdb/lib:' \
-            f'/workspace/nntoolchain/net_compiler/../bm_prebuilt_toolchains/x86/openblas/lib:' \
-            f'/workspace/nntoolchain/net_compiler/../bm_prebuilt_toolchains/x86/tflite/2.8.0/lib/release:' \
-            f'/workspace/nntoolchain/net_compiler/../bm_prebuilt_toolchains/hdf5-1.8.16_x86_64/lib:' \
-            f'/workspace/nntoolchain/net_compiler/../bm_prebuilt_toolchains/x86/pytorch/openmpi/lib:' \
-            f'/workspace/nntoolchain/net_compiler/../bm_prebuilt_toolchains/x86/pytorch/ibverbs:' \
-            f'/workspace/nntoolchain/net_compiler/../bm_prebuilt_toolchains/x86/pytorch/hwloc:' \
-            f'/workspace/nntoolchain/net_compiler/../bm_prebuilt_toolchains/x86/openblas/lib:',
-            f'PATH=/workspace/nntoolchain/net_compiler/out/install_bmruntime/app:/workspace/nntoolchain/net_compiler/out/install_bmodel/tools:/workspace/nntoolchain/net_compiler/out/install_bmlang/test:' \
+            f'$BM_INSTALL_PATH/lib:' \
+            f'$BMCOMPILER_INSTALL_PATH/lib:' \
+            f'$BMLANG_INSTALL_PATH/lib:' \
+            f'$IMPBMNETC_INSTALL_PATH/lib:' \
+            f'$IMPBMNETCRT_INSTALL_PATH/lib' \
+            f'$BMCPU_INSTALL_PATH/lib:' \
+            f'$BMNETC_INSTALL_PATH/lib:' \
+            f'$BMNETU_INSTALL_PATH/lib:' \
+            f'$BMUFW_INSTALL_PATH/lib:' \
+            f'$BMRUNTIME_INSTALL_PATH/lib:' \
+            f'$BMTPU_BACKEND_PATH:' \
+            f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/protobuf_x86_64/lib:' \
+            f'$USERCPU_INSTALL_PATH/lib:' \
+            f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/lmdb/lib:' \
+            f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/openblas/lib:' \
+            f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/tflite/2.8.0/lib/release:' \
+            f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/hdf5-1.8.16_x86_64/lib:' \
+            f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/pytorch/openmpi/lib:' \
+            f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/pytorch/ibverbs:' \
+            f'NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/pytorch/hwloc:' \
+            f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/openblas/lib:',
+            f'PATH=$BMRUNTIME_INSTALL_PATH/app:$BMODEL_INSTALL_PATH/tools:$BMLANG_INSTALL_PATH/test:' \
             f'/usr/local/bin:/usr/bin:/bin'
         ],
         tty=True, detach=True)
     logging.info(f'NNTC container {nntc_container.name}')
 
     logging.info(f'Setting up NNTC')
-    # ret, _ = nntc_container.exec_run(
-    #     f'bash -c "source /workspace/nntoolchain/net_compiler/scripts/envsetup.sh"',
-    #     tty=True)
-    # assert ret == 0
-    # ret, _ = nntc_container.exec_run(
-    #     f'bash -c "/workspace/nntoolchain/scripts/release.sh"', tty=True)
-    # assert ret == 0
-
-    exec_response = nntc_container.exec_run('ls /workspace', tty=True).output.decode('utf-8')
-    logging.info(f'docker working dir is {exec_response}')
-
-    exec_instance = nntc_container.exec_run(
-        f'bash -c "cd /workspace/nntoolchain && git init && /workspace/nntoolchain/scripts/release.sh"', tty=True, stream=True)
-    # output = exec_repo.output.decode('utf-8')
-    # logging.info(f'exec_repo {output}')
+    exec_id = nntc_container.exec_run(
+        f'bash -c "cd /workspace/nntoolchain && git init && apt list --upgradable && /workspace/nntoolchain/scripts/release.sh"',
+        tty=True, stream=True)
 
     try:
         while True:
-            line = next(exec_instance[1]).decode("utf-8")
+            line = next(exec_id[1]).decode("utf-8")
             logging.info(line)
+            while line == 'Do you want to continue? [Y/n]':
+                exec_id.write(b"Y\n")
+                exec_id.output.flush()
+
     except StopIteration:
         print(f'exec stream ended for container')
 
@@ -459,7 +376,7 @@ def mlir_docker(latest_tpu_perf_whl, commit_id, case_list, model_zoo_dir, tpu_ml
             f'/workspace/tpu-mlir/python/utils:' \
             f'/workspace/tpu-mlir/python/test:' \
             f'/workspace/tpu-mlir/python/samples:' \
-            f'/usr/local/bin:/usr/bin:/bin',  # important
+            f'/usr/local/bin:/usr/bin:/bin',
             f'LD_LIBRARY_PATH=/workspace/tpu-mlir/install/lib',
             f'PYTHONPATH=/workspace/tpu-mlir/install/python:' \
             f'/workspace/tpu-mlir/third_party/llvm/python_packages/mlir_core:' \
@@ -469,19 +386,16 @@ def mlir_docker(latest_tpu_perf_whl, commit_id, case_list, model_zoo_dir, tpu_ml
         tty=True, detach=True)
     logging.info(f'MLIR container {mlir_container.name}')
 
-###############################
     # tpu-mlir compilation
     logging.info(f'Setting up MLIR')
     # ret, _ = mlir_container.exec_run(f'bash -c "/workspace/tpu-mlir/build.sh"', tty=True)
     # assert ret == 0
 
     # tpu-mlir compilation
-    # cmd = f'bash -c "source /workspace/tpu-mlir/envsetup.sh && /workspace/tpu-mlir/build.sh"'
-    cmd = f'bash -c "/workspace/tpu-mlir/build.sh"'  # /home/sophgo/qinyu/program/blame-test/tpu-mlir
+    cmd = f'bash -c "/workspace/tpu-mlir/build.sh"'
     exec_id = mlir_container.exec_run(cmd, tty=True)
     output = exec_id.output.decode('utf-8')
     logging.info(f'exec_id {output}')
-    logging.info(f'Tpu-mlir compilation is complete')
 
     # git lfs pull case files
     os.chdir(model_zoo_dir)

@@ -3,7 +3,7 @@ import pytest
 from utils import container_run
 
 @pytest.fixture(scope='module')
-def make_lmdb(nntc_env):
+def make_lmdb(nntc_env, get_dataset):
     if not nntc_env['case_list']:
         logging.info(f'Skip nntc make lmdb')
         return
