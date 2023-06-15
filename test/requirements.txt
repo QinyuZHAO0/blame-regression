@@ -1,0 +1,4 @@
+pandas
+docker
+pytest
+urllib3<2
