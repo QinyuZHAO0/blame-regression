@@ -167,28 +167,28 @@ def remove_tree(path):
         else:
             os.remove(m)
 
-dummy_github_output = '/tmp/dummy.github.output.txt'
-def read_github_output(key):
-    if 'GITHUB_OUTPUT' in os.environ:
-        return os.environ[key]
-    else:
-        with open(dummy_github_output) as f:
-            data = dict(
-                line.strip(' \n').split('=')
-                for line in f.readlines() if line)
-            return data[key]
-
-def write_github_output(key, value):
-    if 'GITHUB_OUTPUT' in os.environ:
-        mode = 'a'
-        output_fn = os.environ['GITHUB_OUTPUT']
-        logging.info(f'Writing {key} to GITHUB_OUTPUT')
-    else:
-        mode = 'w'
-        output_fn = dummy_github_output
-
-    with open(output_fn, mode) as f:
-        f.write(f'{key}={value}\n')
+# dummy_github_output = '/tmp/dummy.github.output.txt'
+# def read_github_output(key):
+#     if 'GITHUB_OUTPUT' in os.environ:
+#         return os.environ[key]
+#     else:
+#         with open(dummy_github_output) as f:
+#             data = dict(
+#                 line.strip(' \n').split('=')
+#                 for line in f.readlines() if line)
+#             return data[key]
+#
+# def write_github_output(key, value):
+#     if 'GITHUB_OUTPUT' in os.environ:
+#         mode = 'a'
+#         output_fn = os.environ['GITHUB_OUTPUT']
+#         logging.info(f'Writing {key} to GITHUB_OUTPUT')
+#     else:
+#         mode = 'w'
+#         output_fn = dummy_github_output
+#
+#     with open(output_fn, mode) as f:
+#         f.write(f'{key}={value}\n')
 
 @pytest.fixture(scope='session')
 def model_zoo_dir():
@@ -218,7 +218,7 @@ def nntc_docker(latest_tpu_perf_whl, commit_id, case_list, model_zoo_dir, nntc_d
 
     # git reset start_commit_id
     os.chdir(nntc_dir)
-    execute_cmd(f'git reset --hard {commit_id}')
+    #execute_cmd(f'git reset --hard {commit_id}')
     logging.info(f'nntc_dir is {os.getcwd()}')
     execute_cmd(f'git submodule update --init')
 
@@ -233,64 +233,64 @@ def nntc_docker(latest_tpu_perf_whl, commit_id, case_list, model_zoo_dir, nntc_d
         volumes=[f'{root}:/workspace'],
         restart_policy={'Name': 'always'},
         environment=[
-            f'NETCOMPILER_TOP=/workspace/nntoolchain/net_compiler',
-            f'BM1682_PATH=$NETCOMPILER_TOP/../aicplatform/bm1682',
-            f'BMCOMPILER_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmcompiler',
-            f'BMRUNTIME_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmruntime',
-            f'BM_INSTALL_PATH=$NETCOMPILER_TOP/out/install',
-            f'BMLANG_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmlang',
-            f'IMPBMNETC_INSTALL_PATH=$NETCOMPILER_TOP/out/install_impbmnetc',
-            f'IMPBMNETCRT_INSTALL_PATH=$NETCOMPILER_TOP/out/install_impbmnetcrt',
-            f'BMCPU_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmcpu',
-            f'BMNETC_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmnetc',
-            f'BMNETU_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmnetu',
-            f'BMUFW_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmufw',
-            f'BMTPU_BACKEND_PATH=$NETCOMPILER_TOP/bmcompiler/libbackend',
-            f'USERCPU_INSTALL_PATH=$NETCOMPILER_TOP/out/install_usercpu',
-            f'BMODEL_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmodel',
-            f'BMCOMPILER_KERNEL_MODULE_PATH=$NETCOMPILER_TOP/../tpu-runtime/lib/libbm1684x_kernel_module.so',
-            f'LD_LIBRARY_PATH=/usr/local/cuda-7.5/lib64:' \
-            f'/opt/OpenBLAS/lib/:' \
-            f'$BM_INSTALL_PATH/lib:' \
-            f'$BMCOMPILER_INSTALL_PATH/lib:' \
-            f'$BMLANG_INSTALL_PATH/lib:' \
-            f'$IMPBMNETC_INSTALL_PATH/lib:' \
-            f'$IMPBMNETCRT_INSTALL_PATH/lib' \
-            f'$BMCPU_INSTALL_PATH/lib:' \
-            f'$BMNETC_INSTALL_PATH/lib:' \
-            f'$BMNETU_INSTALL_PATH/lib:' \
-            f'$BMUFW_INSTALL_PATH/lib:' \
-            f'$BMRUNTIME_INSTALL_PATH/lib:' \
-            f'$BMTPU_BACKEND_PATH:' \
-            f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/protobuf_x86_64/lib:' \
-            f'$USERCPU_INSTALL_PATH/lib:' \
-            f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/lmdb/lib:' \
-            f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/openblas/lib:' \
-            f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/tflite/2.8.0/lib/release:' \
-            f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/hdf5-1.8.16_x86_64/lib:' \
-            f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/pytorch/openmpi/lib:' \
-            f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/pytorch/ibverbs:' \
-            f'NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/pytorch/hwloc:' \
-            f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/openblas/lib:',
-            f'PATH=$BMRUNTIME_INSTALL_PATH/app:$BMODEL_INSTALL_PATH/tools:$BMLANG_INSTALL_PATH/test:' \
-            f'/usr/local/bin:/usr/bin:/bin'
+            # f'NETCOMPILER_TOP=/workspace/nntoolchain/net_compiler',
+            # f'BM1682_PATH=$NETCOMPILER_TOP/../aicplatform/bm1682',
+            # f'BMCOMPILER_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmcompiler',
+            # f'BMRUNTIME_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmruntime',
+            # f'BM_INSTALL_PATH=$NETCOMPILER_TOP/out/install',
+            # f'BMLANG_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmlang',
+            # f'IMPBMNETC_INSTALL_PATH=$NETCOMPILER_TOP/out/install_impbmnetc',
+            # f'IMPBMNETCRT_INSTALL_PATH=$NETCOMPILER_TOP/out/install_impbmnetcrt',
+            # f'BMCPU_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmcpu',
+            # f'BMNETC_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmnetc',
+            # f'BMNETU_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmnetu',
+            # f'BMUFW_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmufw',
+            # f'BMTPU_BACKEND_PATH=$NETCOMPILER_TOP/bmcompiler/libbackend',
+            # f'USERCPU_INSTALL_PATH=$NETCOMPILER_TOP/out/install_usercpu',
+            # f'BMODEL_INSTALL_PATH=$NETCOMPILER_TOP/out/install_bmodel',
+            # f'BMCOMPILER_KERNEL_MODULE_PATH=$NETCOMPILER_TOP/../tpu-runtime/lib/libbm1684x_kernel_module.so',
+            # f'LD_LIBRARY_PATH=/usr/local/cuda-7.5/lib64:' \
+            # f'/opt/OpenBLAS/lib/:' \
+            # f'$BM_INSTALL_PATH/lib:' \
+            # f'$BMCOMPILER_INSTALL_PATH/lib:' \
+            # f'$BMLANG_INSTALL_PATH/lib:' \
+            # f'$IMPBMNETC_INSTALL_PATH/lib:' \
+            # f'$IMPBMNETCRT_INSTALL_PATH/lib' \
+            # f'$BMCPU_INSTALL_PATH/lib:' \
+            # f'$BMNETC_INSTALL_PATH/lib:' \
+            # f'$BMNETU_INSTALL_PATH/lib:' \
+            # f'$BMUFW_INSTALL_PATH/lib:' \
+            # f'$BMRUNTIME_INSTALL_PATH/lib:' \
+            # f'$BMTPU_BACKEND_PATH:' \
+            # f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/protobuf_x86_64/lib:' \
+            # f'$USERCPU_INSTALL_PATH/lib:' \
+            # f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/lmdb/lib:' \
+            # f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/openblas/lib:' \
+            # f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/tflite/2.8.0/lib/release:' \
+            # f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/hdf5-1.8.16_x86_64/lib:' \
+            # f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/pytorch/openmpi/lib:' \
+            # f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/pytorch/ibverbs:' \
+            # f'NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/pytorch/hwloc:' \
+            # f'$NETCOMPILER_TOP/../bm_prebuilt_toolchains/x86/openblas/lib:',
+            # f'PATH=$BMRUNTIME_INSTALL_PATH/app:$BMODEL_INSTALL_PATH/tools:$BMLANG_INSTALL_PATH/test:' \
+            # f'/usr/local/sbin:/usr/sbin:/sbin' \
+            # f'/usr/local/bin:/usr/bin:/bin',
         ],
         tty=True, detach=True)
     logging.info(f'NNTC container {nntc_container.name}')
 
+    exec_id = nntc_container.exec_run(f'bash -c "apt update && apt install -y libgflags-dev libgflags2.2 libncurses5-dev"', tty=True)
+    logging.info(f'exec_id {exec_id.output.decode("utf-8")}')
+
     logging.info(f'Setting up NNTC')
     exec_id = nntc_container.exec_run(
-        f'bash -c "cd /workspace/nntoolchain && git init && apt list --upgradable && /workspace/nntoolchain/scripts/release.sh"',
+        f'bash -c "cd /workspace/nntoolchain && git init && apt install -y cmake && /workspace/nntoolchain/scripts/release.sh"',
         tty=True, stream=True)
 
     try:
         while True:
             line = next(exec_id[1]).decode("utf-8")
             logging.info(line)
-            while line == 'Do you want to continue? [Y/n]':
-                exec_id.write(b"Y\n")
-                exec_id.output.flush()
-
     except StopIteration:
         print(f'exec stream ended for container')
 
@@ -300,16 +300,21 @@ def nntc_docker(latest_tpu_perf_whl, commit_id, case_list, model_zoo_dir, nntc_d
     # logging.info(f'Tpu-mlir compilation is complete')
 
     os.chdir(f'{nntc_dir}/out')
-    nntc_release_dir = glob.glob(f'tpu-nntc_v*')[1]
-    # if nntc_release_dir != None:
-    #     nntc_release_dir = lambda x: x.endswith('.tar.gz')
-    ret, _ = nntc_container.exec_run(
+    nntc_release_dir = glob.glob(f'tpu-nntc_v*')[-1]
+
+    # ret, _ = nntc_container.exec_run(
+    #     f'bash -c "source /workspace/nntoolchain/out/{nntc_release_dir}/scripts/envsetup.sh"', tty=True)
+    # assert ret == 0
+    # logging.info(f'source /workspace/nntoolchain/out/{nntc_release_dir}/scripts/envsetup.sh')
+
+    exec_id = nntc_container.exec_run(
         f'bash -c "source /workspace/nntoolchain/out/{nntc_release_dir}/scripts/envsetup.sh"', tty=True)
-    assert ret == 0
-    logging.info(f'source /workspace/nntoolchain/out/{nntc_release_dir}/scripts/envsetup.sh')
+    logging.info(f'source exec_id {exec_id.output.decode("utf-8")}')
 
     # git lfs pull case files
     os.chdir(model_zoo_dir)
+    # execute_cmd(
+    #     f'bash -c "apt-get update && apt-get install -y git-lfs && export GIT_SSL_NO_VERIFY=1 && export GIT_LFS_SKIP_SMUDGE=1"')
     execute_cmd(f'git lfs pull --exclude " " --include "{case_list}/*"')
 
     # Enter model-zoo and remove old outputs
@@ -323,20 +328,21 @@ def nntc_docker(latest_tpu_perf_whl, commit_id, case_list, model_zoo_dir, nntc_d
     nntc_container.exec_run(
         f'bash -c "cd /workspace/model-zoo && chown -R {os.getuid()} {" ".join(dirs_to_remove)}"',
         tty=True)
+
     # delete files in nntoolchain
-    nntc_container.exec_run(
-        f'bash -c "cd /workspace/nntoolchain && chown -R {os.getuid()} {" ".join(dirs_to_remove)}"',
-        tty=True)
+    # nntc_container.exec_run(
+    #     f'bash -c "rm -r /workspace/nntoolchain/out"',
+    #     tty=True)
 
     # Pack bmodels for runtime jobs
     model_tar = f'NNTC_{uuid.uuid4()}.tar'
     for target in ['BM1684', 'BM1684X']:
         upload_bmodel(target, model_tar, f'<(find out*_{target} -name \'*.compilation\' 2>/dev/null)')
-    write_github_output('NNTC_MODEL_TAR', model_tar)
+    #write_github_output('NNTC_MODEL_TAR', model_tar)
 
     # Docker cleanup
-    logging.info(f'Removing NNTC container {nntc_container.name}')
-    nntc_container.remove(v=True, force=True)
+    # logging.info(f'Removing NNTC container {nntc_container.name}')
+    # nntc_container.remove(v=True, force=True)
 
     for d in dirs_to_remove:
         remove_tree(d)
@@ -393,13 +399,20 @@ def mlir_docker(latest_tpu_perf_whl, commit_id, case_list, model_zoo_dir, tpu_ml
 
     # tpu-mlir compilation
     cmd = f'bash -c "/workspace/tpu-mlir/build.sh"'
-    exec_id = mlir_container.exec_run(cmd, tty=True)
-    output = exec_id.output.decode('utf-8')
-    logging.info(f'exec_id {output}')
+    exec_id = mlir_container.exec_run(cmd, tty=True, stream=True)
+
+    try:
+        while True:
+            line = next(exec_id[1]).decode("utf-8")
+            logging.info(line)
+    except StopIteration:
+        print(f'exec stream ended for container')
 
     # git lfs pull case files
     os.chdir(model_zoo_dir)
-    execute_cmd(f'git lfs pull --exclude " " --include "{case_list}/*"')
+    # execute_cmd(
+    #     f'bash -c "sudo apt-get update && sudo apt-get install -y git-lfs && export GIT_SSL_NO_VERIFY=1 && export GIT_LFS_SKIP_SMUDGE=1"')
+    # execute_cmd(f'git lfs pull --exclude " " --include "{case_list}/*"')
 
     # Enter model-zoo and remove old outputs
     mlir_container.exec_run(f'bash -c "cd /workspace/model-zoo && rm -rf *out* "', tty=True)
@@ -422,7 +435,7 @@ def mlir_docker(latest_tpu_perf_whl, commit_id, case_list, model_zoo_dir, tpu_ml
         with open(list_fn, 'w') as f:
             f.write('\n'.join(relative_fns))
         upload_bmodel(target, model_tar, list_fn)
-    write_github_output('MLIR_MODEL_TAR', model_tar)
+    #write_github_output('MLIR_MODEL_TAR', model_tar)
 
     # Chown so we can delete them later
     dirs_to_remove = ['*.tar', '*out*', 'data', '*list.txt', '.tar.gz']
@@ -436,6 +449,8 @@ def mlir_docker(latest_tpu_perf_whl, commit_id, case_list, model_zoo_dir, tpu_ml
 
     for d in dirs_to_remove:
         remove_tree(d)
+
+    logging.info(f'BMODEL_TAR: {model_tar}')
 
 def git_commit_id(rev):
     p = subprocess.run(
@@ -520,6 +535,7 @@ def pytest_addoption(parser):
     parser.addoption('--case_name', action='store', help="Case list")
     parser.addoption('--target', action='store', help="Target chip")
     parser.addoption('--commit_id', action='store', help="The specific version of the toolchain")
+    parser.addoption('--bmodel_tar', action='store', help=" ")
 
 @pytest.fixture(scope='session')
 def target(request):
@@ -532,6 +548,10 @@ def case_list(request):
 @pytest.fixture(scope='session')
 def commit_id(request):
     return request.config.getoption('--commit_id')
+
+@pytest.fixture(scope='session')
+def model_tar(request):
+    return request.config.getoption('--bmodel_tar')
 
 import pandas as pd
 def check_output_csv():
@@ -573,7 +593,7 @@ def package_csv(target, model_tar):
     import platform
     arch = platform.machine()
 
-    fn = f'csv_{target}_ARM64_{model_tar}.gz' if arch == 'aarch64' else f'csv_{target}_X64_{model_tar}.gz'
+    fn = f'csv_{target}_{model_tar}.gz'
     subprocess.run(
         f'bash -c "tar -T <(find ./ -name "*.csv") -cvf {fn}"',
         shell=True, check=True)
@@ -588,13 +608,13 @@ def precision_dependencies(latest_tpu_perf_whl):
     execute_cmd('pip3 install -r requirements.txt -i https://mirrors.cloud.tencent.com/pypi/simple > /dev/null')
 
 @pytest.fixture(scope='session')
-def mlir_runtime(target, case_list, model_zoo_dir):
+def mlir_runtime(target, case_list, model_zoo_dir, model_tar):
+    os.chdir(model_zoo_dir)
     dirs_to_remove = ['*.tar', '*out*', 'data', '.tar.gz']
     for d in dirs_to_remove:
         remove_tree(d)
 
-    os.chdir(model_zoo_dir)
-    model_tar = read_github_output('MLIR_MODEL_TAR')
+    #model_tar = read_github_output('MLIR_MODEL_TAR')
     assert model_tar, 'Model tar is empty'
     download_bmodel(target, model_tar)
     logging.info(f'Running cases "{case_list}"')
@@ -609,12 +629,12 @@ def mlir_runtime(target, case_list, model_zoo_dir):
         remove_tree(d)
 
 @pytest.fixture(scope='session')
-def nntc_runtime(target, case_list):
+def nntc_runtime(target, case_list, model_tar):
     dirs_to_remove = ['*.tar', '*out*', 'data', '.tar.gz']
     for d in dirs_to_remove:
         remove_tree(d)
 
-    model_tar = read_github_output('NNTC_MODEL_TAR')
+    #model_tar = read_github_output('NNTC_MODEL_TAR')
     assert model_tar, 'Model tar is empty'
     download_bmodel(target, model_tar)
     logging.info(f'Running cases "{case_list}"')
