@@ -167,28 +167,17 @@ def remove_tree(path):
         else:
             os.remove(m)
 
-# dummy_github_output = '/tmp/dummy.github.output.txt'
-# def read_github_output(key):
-#     if 'GITHUB_OUTPUT' in os.environ:
-#         return os.environ[key]
-#     else:
-#         with open(dummy_github_output) as f:
-#             data = dict(
-#                 line.strip(' \n').split('=')
-#                 for line in f.readlines() if line)
-#             return data[key]
-#
-# def write_github_output(key, value):
-#     if 'GITHUB_OUTPUT' in os.environ:
-#         mode = 'a'
-#         output_fn = os.environ['GITHUB_OUTPUT']
-#         logging.info(f'Writing {key} to GITHUB_OUTPUT')
-#     else:
-#         mode = 'w'
-#         output_fn = dummy_github_output
-#
-#     with open(output_fn, mode) as f:
-#         f.write(f'{key}={value}\n')
+import json
+build_vals_output = './build_vals.json'
+
+def write_build_vals_output(value):
+    output_fn = build_vals_output
+
+    data = {
+        "BMODEL_TAR": value
+    }
+    with open(output_fn, 'w') as f:
+        json.dump(data, f)
 
 @pytest.fixture(scope='session')
 def model_zoo_dir():
@@ -322,8 +311,9 @@ def nntc_docker(latest_tpu_perf_whl, commit_id, case_list, model_zoo_dir, nntc_d
 
     yield dict(docker=client, container=nntc_container)
 
+    os.chdir(model_zoo_dir)
     # Chown so we can delete them later
-    dirs_to_remove = ['*.tar', '*out*', 'data', '.tar.gz']
+    dirs_to_remove = ['*.tar', '*out*', 'data', '*.tar.gz']
     # delete files in model-zoo
     nntc_container.exec_run(
         f'bash -c "cd /workspace/model-zoo && chown -R {os.getuid()} {" ".join(dirs_to_remove)}"',
@@ -336,16 +326,20 @@ def nntc_docker(latest_tpu_perf_whl, commit_id, case_list, model_zoo_dir, nntc_d
 
     # Pack bmodels for runtime jobs
     model_tar = f'NNTC_{uuid.uuid4()}.tar'
+    os.environ['BMODEL_TAR'] = model_tar
+
     for target in ['BM1684', 'BM1684X']:
         upload_bmodel(target, model_tar, f'<(find out*_{target} -name \'*.compilation\' 2>/dev/null)')
-    #write_github_output('NNTC_MODEL_TAR', model_tar)
+    write_build_vals_output(model_tar)
 
     # Docker cleanup
-    # logging.info(f'Removing NNTC container {nntc_container.name}')
-    # nntc_container.remove(v=True, force=True)
+    logging.info(f'Removing NNTC container {nntc_container.name}')
+    nntc_container.remove(v=True, force=True)
 
     for d in dirs_to_remove:
         remove_tree(d)
+
+    logging.info(f'BMODEL_TAR: {model_tar}')
 
 @pytest.fixture(scope='session')
 def mlir_docker(latest_tpu_perf_whl, commit_id, case_list, model_zoo_dir, tpu_mlir_dir):
@@ -410,9 +404,7 @@ def mlir_docker(latest_tpu_perf_whl, commit_id, case_list, model_zoo_dir, tpu_ml
 
     # git lfs pull case files
     os.chdir(model_zoo_dir)
-    # execute_cmd(
-    #     f'bash -c "sudo apt-get update && sudo apt-get install -y git-lfs && export GIT_SSL_NO_VERIFY=1 && export GIT_LFS_SKIP_SMUDGE=1"')
-    # execute_cmd(f'git lfs pull --exclude " " --include "{case_list}/*"')
+    execute_cmd(f'git lfs pull --exclude " " --include "{case_list}/*"')
 
     # Enter model-zoo and remove old outputs
     mlir_container.exec_run(f'bash -c "cd /workspace/model-zoo && rm -rf *out* "', tty=True)
@@ -421,6 +413,7 @@ def mlir_docker(latest_tpu_perf_whl, commit_id, case_list, model_zoo_dir, tpu_ml
 
     # Pack bmodels for runtime jobs
     model_tar = f'MLIR_{uuid.uuid4()}.tar'
+
     for target in ['BM1684', 'BM1684X']:
         relative_fns = set()
         for dirpath, dirnames, filenames in os.walk(f'mlir_out_{target}'):
@@ -435,10 +428,11 @@ def mlir_docker(latest_tpu_perf_whl, commit_id, case_list, model_zoo_dir, tpu_ml
         with open(list_fn, 'w') as f:
             f.write('\n'.join(relative_fns))
         upload_bmodel(target, model_tar, list_fn)
-    #write_github_output('MLIR_MODEL_TAR', model_tar)
+
+    write_build_vals_output(model_tar)
 
     # Chown so we can delete them later
-    dirs_to_remove = ['*.tar', '*out*', 'data', '*list.txt', '.tar.gz']
+    dirs_to_remove = ['*.tar', '*out*', 'data', '*list.txt', '*.tar.gz']
     mlir_container.exec_run(
         f'bash -c "cd /workspace/model-zoo && chown -R {os.getuid()} {" ".join(dirs_to_remove)}"',
         tty=True)
@@ -535,7 +529,7 @@ def pytest_addoption(parser):
     parser.addoption('--case_name', action='store', help="Case list")
     parser.addoption('--target', action='store', help="Target chip")
     parser.addoption('--commit_id', action='store', help="The specific version of the toolchain")
-    parser.addoption('--bmodel_tar', action='store', help=" ")
+    parser.addoption('--bmodel_tar', action='store', help="the name of bmodel tar")
 
 @pytest.fixture(scope='session')
 def target(request):
@@ -610,11 +604,10 @@ def precision_dependencies(latest_tpu_perf_whl):
 @pytest.fixture(scope='session')
 def mlir_runtime(target, case_list, model_zoo_dir, model_tar):
     os.chdir(model_zoo_dir)
-    dirs_to_remove = ['*.tar', '*out*', 'data', '.tar.gz']
+    dirs_to_remove = ['*.tar', '*out*', 'data', '*.tar.gz']
     for d in dirs_to_remove:
         remove_tree(d)
 
-    #model_tar = read_github_output('MLIR_MODEL_TAR')
     assert model_tar, 'Model tar is empty'
     download_bmodel(target, model_tar)
     logging.info(f'Running cases "{case_list}"')
@@ -630,11 +623,10 @@ def mlir_runtime(target, case_list, model_zoo_dir, model_tar):
 
 @pytest.fixture(scope='session')
 def nntc_runtime(target, case_list, model_tar):
-    dirs_to_remove = ['*.tar', '*out*', 'data', '.tar.gz']
+    dirs_to_remove = ['*.tar', '*out*', 'data', '*.tar.gz']
     for d in dirs_to_remove:
         remove_tree(d)
 
-    #model_tar = read_github_output('NNTC_MODEL_TAR')
     assert model_tar, 'Model tar is empty'
     download_bmodel(target, model_tar)
     logging.info(f'Running cases "{case_list}"')
